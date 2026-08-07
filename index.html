@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Organisation du mariage — Marie &amp; Lucas</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,600;0,700;1,500&family=Caveat:wght@500;600&family=JetBrains+Mono:wght@400;500;600&display=swap');
+  * { box-sizing: border-box; }
+  body { margin:0; min-height:100vh; background:#F6F0E4; font-family:'JetBrains Mono', monospace; color:#3B2A1F; padding:32px 16px 60px; }
+  .wrap { max-width: 1100px; margin: 0 auto; }
+  .header { max-width:900px; margin:0 auto 20px; text-align:center; }
+  .monogram { font-family:'Caveat',cursive; font-size:22px; font-weight:600; color:#D9823E; margin:0 0 2px; }
+  .stamp { display:inline-block; font-size:11px; letter-spacing:2px; font-weight:600; color:#C15E26; border:1px solid #C15E2666; border-radius:999px; padding:4px 14px; margin-bottom:14px; text-transform:uppercase; }
+  h1.title { font-family:'Fraunces',serif; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; font-size:clamp(26px,5.5vw,42px); margin:0 0 6px; color:#C15E26; }
+  .subtitle { font-family:'Caveat',cursive; font-size:24px; color:#9C4A1C; margin:0 0 20px; }
+  .progress-row { display:flex; align-items:center; gap:12px; max-width:420px; margin:0 auto; }
+  .progress-bg { flex:1; height:6px; border-radius:999px; background:#EDE1CC; overflow:hidden; }
+  .progress-fill { height:100%; background:#C15E26; transition:width .3s ease; }
+  .progress-label { font-size:11px; color:#B08A63; white-space:nowrap; }
+  .day-tabs { display:flex; justify-content:center; gap:10px; margin-bottom:16px; }
+  .day-tab { font-family:'Fraunces',serif; font-size:17px; font-weight:600; padding:8px 22px; border-radius:12px; border:1px solid #E3D5BE; background:#fff; color:#7A3A16; cursor:pointer; display:flex; align-items:baseline; gap:6px; }
+  .day-tab.active { background:#C15E26; color:#FFF8ED; border-color:#C15E26; }
+  .day-tab .date { font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:400; opacity:.75; }
+  .filter-row { display:flex; justify-content:center; gap:8px; margin-bottom:8px; flex-wrap:wrap; max-width:900px; margin-left:auto; margin-right:auto; }
+  .filter-btn { font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:500; padding:8px 16px; border-radius:999px; border:1px solid #E3D5BE; background:#fff; color:#7A3A16; cursor:pointer; }
+  .filter-btn.active { background:#3B2A1F; color:#FFF8ED; border-color:#3B2A1F; }
+  .chip { font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:600; padding:7px 14px; border-radius:999px; border:1px solid; cursor:pointer; background:#fff; }
+  .roster-toggle { font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:500; padding:7px 14px; border-radius:999px; border:1px dashed #C7A87E; background:transparent; color:#9C7B52; cursor:pointer; }
+  .roster-editor { max-width:700px; margin:0 auto 20px; display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:center; background:#FFFFFFAA; border:1px solid #E3D5BE; border-radius:12px; padding:14px; }
+  .roster-tag { display:inline-flex; align-items:center; gap:6px; font-size:11px; background:#F0E4CE; border-radius:999px; padding:5px 6px 5px 12px; }
+  .roster-remove { font-size:10px; color:#B45252; background:none; border:none; cursor:pointer; padding:2px; }
+  .roster-input { font-size:12px; padding:6px 10px; border-radius:8px; border:1px solid #E3D5BE; }
+  .roster-add { font-size:12px; font-weight:600; padding:6px 12px; border-radius:8px; border:none; background:#C15E26; color:#FFF8ED; cursor:pointer; }
+  .pdf-row { display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:center; max-width:900px; margin:0 auto 24px; }
+  .pdf-label { font-size:11px; color:#9C7B52; margin-right:4px; }
+  .pdf-btn { font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:600; padding:6px 13px; border-radius:999px; border:1px solid; background:#fff; cursor:pointer; }
+  .board { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:18px; max-width:1100px; margin:0 auto 24px; }
+  .column { background:#FFFFFFAA; border:1px solid #E3D5BE; border-radius:14px; padding:14px; display:flex; flex-direction:column; min-height:200px; }
+  .col-header { display:flex; justify-content:space-between; align-items:center; font-family:'Fraunces',serif; font-weight:700; font-size:19px; margin-bottom:12px; border-bottom:1px solid #E3D5BE; padding-bottom:10px; color:#7A3A16; }
+  .col-count { font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:600; color:#9C7B52; background:#F0E4CE; border-radius:999px; padding:2px 9px; }
+  .col-body { display:flex; flex-direction:column; gap:10px; }
+  .empty { font-size:12px; color:#C7A87E; font-style:italic; padding:10px 4px; }
+  .card { background:#fff; border:1px solid #F0E4CE; border-radius:10px; padding:12px 14px; box-shadow:0 1px 2px rgba(59,42,31,.05); }
+  .card-time { font-size:12px; font-weight:700; color:#C15E26; letter-spacing:.5px; }
+  .card-title { font-family:sans-serif; font-size:14px; font-weight:600; margin:4px 0 4px; color:#3B2A1F; }
+  .card-detail { font-family:sans-serif; font-size:12px; color:#8A7156; margin:0 0 8px; line-height:1.4; }
+  .card-people { display:flex; flex-wrap:wrap; gap:4px; margin-bottom:8px; }
+  .person-tag-sm { font-size:10px; font-weight:700; border-radius:999px; padding:2px 8px; }
+  .card-actions { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; align-items:center; }
+  .move-btn { font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:500; color:#9C4A1C; background:#C15E2614; border:1px solid #C15E2633; border-radius:6px; padding:4px 8px; cursor:pointer; }
+  .edit-btn { font-size:11px; color:#9C7B52; background:#9C7B5214; border:1px solid #9C7B5233; border-radius:6px; padding:4px 8px; cursor:pointer; }
+  .delete-btn { font-size:11px; color:#B45252; background:#B4525214; border:1px solid #B4525233; border-radius:6px; padding:4px 8px; cursor:pointer; margin-left:auto; }
+  .edit-row { display:flex; gap:6px; margin-bottom:6px; }
+  .edit-time { font-size:12px; padding:6px 8px; border-radius:6px; border:1px solid #E3D5BE; width:90px; }
+  .edit-title { font-family:sans-serif; font-size:13px; padding:6px 8px; border-radius:6px; border:1px solid #E3D5BE; flex:1; }
+  .edit-detail { font-family:sans-serif; font-size:12px; padding:6px 8px; border-radius:6px; border:1px solid #E3D5BE; width:100%; resize:vertical; margin-bottom:8px; box-sizing:border-box; }
+  .edit-people { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px; justify-content:center; }
+  .save-btn { font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:600; color:#fff; background:#9C4A1C; border:1px solid #9C4A1C; border-radius:6px; padding:5px 10px; cursor:pointer; }
+  .cancel-btn { font-family:'JetBrains Mono',monospace; font-size:11px; color:#9C7B52; background:#fff; border:1px solid #E3D5BE; border-radius:6px; padding:5px 10px; cursor:pointer; }
+  .add-form { max-width:700px; margin:0 auto 16px; display:flex; flex-direction:column; gap:10px; }
+  .add-top-row { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; }
+  .time-input { font-size:13px; padding:9px 10px; border-radius:8px; border:1px solid #E3D5BE; background:#fff; }
+  .text-input { font-family:sans-serif; font-size:13px; padding:9px 12px; border-radius:8px; border:1px solid #E3D5BE; background:#fff; flex:1 1 200px; }
+  .add-btn { font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:600; padding:9px 18px; border-radius:8px; border:none; background:#C15E26; color:#FFF8ED; cursor:pointer; }
+  .footer { text-align:center; font-size:11px; color:#C7A87E; }
+  .setup { max-width:640px; margin:60px auto; background:#fff; border:1px solid #E3D5BE; border-radius:14px; padding:28px 30px; line-height:1.6; font-family:sans-serif; font-size:14px; }
+  .setup h2 { font-family:'Fraunces',serif; color:#C15E26; margin-top:0; }
+  .setup code { background:#F0E4CE; padding:2px 6px; border-radius:4px; font-size:13px; }
+  .setup ol { padding-left:20px; }
+  .setup textarea { width:100%; min-height:120px; font-family:monospace; font-size:12px; padding:10px; border-radius:8px; border:1px solid #E3D5BE; }
+</style>
+</head>
+<body>
+<div id="setup-screen" class="setup" style="display:none;">
+  <h2>Configuration initiale (une seule fois)</h2>
+  <p>Ce fichier a besoin d'une base <strong>Firebase</strong> gratuite pour synchroniser le planning entre tout le monde, sans que vos témoins aient besoin d'un compte.</p>
+  <ol>
+    <li>Allez sur <code>console.firebase.google.com</code> et créez un projet (gratuit, "plan Spark").</li>
+    <li>Dans le projet : <em>Build → Firestore Database</em> → créer une base, mode "test" pour commencer.</li>
+    <li>Dans <em>Build → Authentication → Sign-in method</em>, activez <strong>Anonyme</strong>.</li>
+    <li>Dans <em>Paramètres du projet → Vos applications</em>, créez une appli Web, copiez l'objet <code>firebaseConfig</code>.</li>
+    <li>Collez-le dans ce fichier à la place du bloc marqué <code>À REMPLACER</code> (cherchez-le tout en haut du <code>&lt;script&gt;</code>), puis enregistrez et rechargez cette page.</li>
+  </ol>
+  <p>Ensuite, hébergez ce fichier (GitHub Pages, Netlify, ou votre hébergeur) et partagez le lien : vos témoins l'ouvrent directement, aucune connexion requise de leur côté.</p>
+</div>
+
+<div id="app" class="wrap" style="display:none;">
+  <header class="header">
+    <p class="monogram">Marie &amp; Lucas</p>
+    <div class="stamp" id="stamp"></div>
+    <h1 class="title">Organisation du mariage</h1>
+    <p class="subtitle" id="subtitle"></p>
+    <div class="progress-row">
+      <div class="progress-bg"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+      <span class="progress-label" id="progress-label">0/0 tâches terminées</span>
+    </div>
+  </header>
+
+  <nav class="day-tabs" id="day-tabs"></nav>
+  <div class="filter-row" id="filter-row"></div>
+  <div id="roster-editor" class="roster-editor" style="display:none;"></div>
+  <div class="pdf-row" id="pdf-row"></div>
+  <div class="board" id="board"></div>
+
+  <form class="add-form" id="add-form">
+    <div class="add-top-row">
+      <input type="time" class="time-input" id="new-time" />
+      <input type="text" class="text-input" id="new-title" placeholder="Ajouter une tâche…" />
+      <button type="submit" class="add-btn">Ajouter</button>
+    </div>
+    <div class="edit-people" id="new-people"></div>
+  </form>
+
+  <footer class="footer" id="status-footer">Planning partagé — synchronisation en direct, aucun compte requis.</footer>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<script>
+
+// ============================================================
+const firebaseConfig = {
+  apiKey: "AIzaSyB5UNw2w-leb7ngP2JZbIA9k0cwL2eKBfo",
+  authDomain: "planning-mariage-partage.firebaseapp.com",
+  projectId: "planning-mariage-partage",
+  storageBucket: "planning-mariage-partage.firebasestorage.app",
+  messagingSenderId: "817390482097",
+  appId: "1:817390482097:web:64028c166729e203d66890"
+};
+// ============================================================
+
+const BOARD_DOC = "boards/marie-lucas";
+
+const DEFAULT_ROSTER = ["Sarah", "Lucile", "Laurie", "Fabien", "Alex"];
+const PERSON_COLORS = ["#C15E26", "#9C4A1C", "#D9823E", "#7A3A16", "#E08A4F", "#B14E1A"];
+const DAYS = [
+  { key: "veille", label: "Veille", date: "25.09.26" },
+  { key: "jourJ", label: "Jour J", date: "26.09.26" },
+];
+const COLUMNS = [
+  { key: "todo", label: "À faire" },
+  { key: "progress", label: "En cours" },
+  { key: "done", label: "Fait" },
+];
+const STATUS_LABEL = { todo: "À faire", progress: "En cours", done: "Fait" };
+
+const DEFAULT_TASKS = [
+  { id: "v1", day: "veille", time: "09:00", title: "Réception livraison fleurs", detail: "Vérifier la commande avant montage", people: [], status: "todo" },
+  { id: "v2", day: "veille", time: "09:30", title: "Installation déco salle", detail: "Nappes, centres de table, motifs de Marion", people: [], status: "todo" },
+  { id: "v3", day: "veille", time: "11:00", title: "Montage photobooth & guestbook vidéo", detail: "Installation et test du matériel loué", people: ["Sarah", "Lucile"], status: "todo" },
+  { id: "v4", day: "veille", time: "12:30", title: "Déjeuner équipe préparation", detail: "Pause commune", people: [], status: "todo" },
+  { id: "v5", day: "veille", time: "14:00", title: "Essai coiffure & maquillage", detail: "", people: ["Sarah", "Lucile"], status: "todo" },
+  { id: "v6", day: "veille", time: "15:30", title: "Répétition cérémonie", detail: "Avec le père Alain", people: [], status: "todo" },
+  { id: "v7", day: "veille", time: "17:00", title: "Récupération des tenues", detail: "Costume et robe", people: [], status: "todo" },
+  { id: "v8", day: "veille", time: "18:00", title: "Briefing témoins", detail: "Discours, timing, rôle du jour J", people: ["Sarah", "Lucile"], status: "todo" },
+  { id: "v9", day: "veille", time: "19:30", title: "Dîner de répétition", detail: "Avec famille et témoins", people: [], status: "todo" },
+  { id: "v10", day: "veille", time: "21:30", title: "Derniers préparatifs", detail: "Valises et affaires", people: [], status: "todo" },
+  { id: "j1", day: "jourJ", time: "08:00", title: "Coiffure & maquillage mariée", detail: "", people: ["Sarah", "Lucile"], status: "todo" },
+  { id: "j2", day: "jourJ", time: "10:00", title: "Habillage des témoins", detail: "", people: ["Sarah", "Lucile", "Laurie"], status: "todo" },
+  { id: "j3", day: "jourJ", time: "11:00", title: "Habillage marié", detail: "", people: ["Fabien", "Alex"], status: "todo" },
+  { id: "j4", day: "jourJ", time: "13:00", title: "Photos avant cérémonie", detail: "", people: [], status: "todo" },
+  { id: "j5", day: "jourJ", time: "15:00", title: "Cérémonie", detail: "Avec le père Alain", people: [], status: "todo" },
+  { id: "j6", day: "jourJ", time: "16:30", title: "Cocktail", detail: "", people: [], status: "todo" },
+  { id: "j7", day: "jourJ", time: "19:00", title: "Dîner & soirée", detail: "", people: [], status: "todo" },
+];
+
+let state = { tasks: DEFAULT_TASKS, roster: DEFAULT_ROSTER };
+let ui = { day: "veille", personFilter: [], showRoster: false, editingId: null, editDraft: null, newPeople: [] };
+let db = null;
+
+function colorFor(name) {
+  const idx = state.roster.indexOf(name);
+  return PERSON_COLORS[idx % PERSON_COLORS.length];
+}
+function escapeHtml(str) {
+  return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
+}
+
+async function saveState() {
+  if (!db) return;
+  try {
+    await db.doc(BOARD_DOC).set(state);
+  } catch (e) {
+    console.error("Erreur de sauvegarde", e);
+  }
+}
+
+function init() {
+  if (firebaseConfig.apiKey === "À REMPLACER") {
+    document.getElementById("setup-screen").style.display = "block";
+    return;
+  }
+  document.getElementById("app").style.display = "block";
+  firebase.initializeApp(firebaseConfig);
+  firebase.auth().signInAnonymously().catch((e) => console.error("Auth error", e));
+  firebase.auth().onAuthStateChanged((user) => {
+    if (!user) return;
+    db = firebase.firestore();
+    db.doc(BOARD_DOC).onSnapshot((snap) => {
+      if (snap.exists) {
+        state = snap.data();
+      } else {
+        db.doc(BOARD_DOC).set(state);
+      }
+      render();
+    }, (err) => console.error("Sync error", err));
+  });
+  render();
+}
+
+function render() {
+  renderHeader();
+  renderDayTabs();
+  renderFilters();
+  renderRosterEditor();
+  renderPdfRow();
+  renderBoard();
+  renderAddForm();
+}
+
+function renderHeader() {
+  const currentDay = DAYS.find((d) => d.key === ui.day);
+  document.getElementById("stamp").textContent = currentDay.date;
+  document.getElementById("subtitle").textContent = (ui.day === "veille" ? "Veille" : "Jour J") + " — Domaine de Bel-Air";
+  const dayTasks = state.tasks.filter((t) => t.day === ui.day);
+  const done = dayTasks.filter((t) => t.status === "done").length;
+  const total = dayTasks.length;
+  document.getElementById("progress-fill").style.width = (total ? (done/total*100) : 0) + "%";
+  document.getElementById("progress-label").textContent = `${done}/${total} tâches terminées`;
+}
+
+function renderDayTabs() {
+  const el = document.getElementById("day-tabs");
+  el.innerHTML = DAYS.map(d => `
+    <button class="day-tab ${d.key===ui.day?'active':''}" onclick="setDay('${d.key}')">${d.label} <span class="date">${d.date}</span></button>
+  `).join("");
+}
+function setDay(key){ ui.day = key; render(); }
+
+function renderFilters() {
+  const el = document.getElementById("filter-row");
+  let html = `<button class="filter-btn ${ui.personFilter.length===0?'active':''}" onclick="clearFilter()">Tout le monde</button>`;
+  html += state.roster.map(name => {
+    const active = ui.personFilter.includes(name);
+    const c = colorFor(name);
+    return `<button class="chip" style="border-color:${c};color:${active?'#fff':c};background:${active?c:c+'14'}" onclick="toggleFilter('${escapeHtml(name)}')">${escapeHtml(name)}</button>`;
+  }).join("");
+  html += `<button class="roster-toggle" onclick="toggleRosterEditor()">${ui.showRoster?'Fermer':'Gérer la liste'}</button>`;
+  el.innerHTML = html;
+}
+function clearFilter(){ ui.personFilter = []; render(); }
+function toggleFilter(name){
+  ui.personFilter = ui.personFilter.includes(name) ? ui.personFilter.filter(n=>n!==name) : [...ui.personFilter, name];
+  render();
+}
+function toggleRosterEditor(){ ui.showRoster = !ui.showRoster; render(); }
+
+function renderRosterEditor() {
+  const el = document.getElementById("roster-editor");
+  if (!ui.showRoster) { el.style.display = "none"; return; }
+  el.style.display = "flex";
+  el.innerHTML = state.roster.map(name => `
+    <span class="roster-tag">${escapeHtml(name)}<button class="roster-remove" onclick="removeRosterName('${escapeHtml(name)}')">✕</button></span>
+  `).join("") + `
+    <form onsubmit="addRosterName(event)" style="display:flex;gap:6px;">
+      <input type="text" id="new-roster-name" class="roster-input" placeholder="Ajouter une personne…" />
+      <button type="submit" class="roster-add">Ajouter</button>
+    </form>`;
+}
+function addRosterName(e) {
+  e.preventDefault();
+  const input = document.getElementById("new-roster-name");
+  const name = input.value.trim();
+  if (!name || state.roster.includes(name)) return;
+  state.roster = [...state.roster, name];
+  saveState(); render();
+}
+function removeRosterName(name) {
+  state.roster = state.roster.filter(n => n !== name);
+  ui.personFilter = ui.personFilter.filter(n => n !== name);
+  saveState(); render();
+}
+
+function renderPdfRow() {
+  const el = document.getElementById("pdf-row");
+  el.innerHTML = `<span class="pdf-label">Rétroplanning PDF :</span>` + state.roster.map(name => {
+    const c = colorFor(name);
+    return `<button class="pdf-btn" style="border-color:${c};color:${c}" onclick="downloadPersonPdf('${escapeHtml(name)}')">⬇ ${escapeHtml(name)}</button>`;
+  }).join("");
+}
+
+function renderBoard() {
+  const dayTasks = state.tasks.filter(t => t.day === ui.day);
+  const visible = dayTasks.filter(t => ui.personFilter.length===0 || t.people.length===0 || t.people.some(p=>ui.personFilter.includes(p)));
+  const el = document.getElementById("board");
+  el.innerHTML = COLUMNS.map(col => {
+    const colTasks = visible.filter(t=>t.status===col.key).sort((a,b)=>a.time.localeCompare(b.time));
+    return `<section class="column">
+      <div class="col-header"><span>${col.label}</span><span class="col-count">${colTasks.length}</span></div>
+      <div class="col-body">
+        ${colTasks.length===0 ? `<p class="empty">Rien ici pour le moment.</p>` : ''}
+        ${colTasks.map(t => renderCard(t, col.key)).join("")}
+      </div>
+    </section>`;
+  }).join("");
+}
+
+function renderCard(t, colKey) {
+  if (ui.editingId === t.id) {
+    const d = ui.editDraft;
+    return `<article class="card">
+      <div class="edit-row">
+        <input type="time" class="edit-time" value="${d.time}" onchange="updateDraft('time', this.value)" />
+        <input type="text" class="edit-title" value="${escapeHtml(d.title)}" onchange="updateDraft('title', this.value)" placeholder="Titre" />
+      </div>
+      <textarea class="edit-detail" rows="2" onchange="updateDraft('detail', this.value)" placeholder="Détails (optionnel)">${escapeHtml(d.detail)}</textarea>
+      <div class="edit-people">
+        ${state.roster.map(name => {
+          const active = d.people.includes(name);
+          const c = colorFor(name);
+          return `<button class="chip" style="font-size:10px;padding:3px 8px;border-color:${c};color:${active?'#fff':c};background:${active?c:c+'14'}" onclick="toggleDraftPerson('${escapeHtml(name)}')">${escapeHtml(name)}</button>`;
+        }).join("")}
+      </div>
+      <div class="card-actions">
+        <button class="save-btn" onclick="saveEdit('${t.id}')">Enregistrer</button>
+        <button class="cancel-btn" onclick="cancelEdit()">Annuler</button>
+      </div>
+    </article>`;
+  }
+  const peopleHtml = t.people.length ? `<div class="card-people">${t.people.map(p=>{
+    const c = colorFor(p);
+    return `<span class="person-tag-sm" style="color:${c};background:${c}1c;border:1px solid ${c}55">${escapeHtml(p)}</span>`;
+  }).join("")}</div>` : '';
+  const moveButtons = COLUMNS.filter(c=>c.key!==colKey).map(c=>`<button class="move-btn" onclick="moveTask('${t.id}','${c.key}')">→ ${c.label}</button>`).join("");
+  return `<article class="card">
+    <div class="card-time">${t.time}</div>
+    <div class="card-title">${escapeHtml(t.title)}</div>
+    ${t.detail ? `<p class="card-detail">${escapeHtml(t.detail)}</p>` : ''}
+    ${peopleHtml}
+    <div class="card-actions">
+      ${moveButtons}
+      <button class="edit-btn" onclick="startEdit('${t.id}')">✎</button>
+      <button class="delete-btn" onclick="removeTask('${t.id}')">✕</button>
+    </div>
+  </article>`;
+}
+
+function moveTask(id, status) {
+  state.tasks = state.tasks.map(t => t.id===id ? {...t, status} : t);
+  saveState(); render();
+}
+function removeTask(id) {
+  state.tasks = state.tasks.filter(t => t.id !== id);
+  saveState(); render();
+}
+function startEdit(id) {
+  const t = state.tasks.find(t=>t.id===id);
+  ui.editingId = id;
+  ui.editDraft = { time: t.time==="—"?"":t.time, title: t.title, detail: t.detail||"", people: [...t.people] };
+  render();
+}
+function cancelEdit(){ ui.editingId = null; render(); }
+function updateDraft(field, value){ ui.editDraft[field] = value; }
+function toggleDraftPerson(name) {
+  ui.editDraft.people = ui.editDraft.people.includes(name) ? ui.editDraft.people.filter(n=>n!==name) : [...ui.editDraft.people, name];
+  render();
+}
+function saveEdit(id) {
+  const d = ui.editDraft;
+  if (!d.title.trim()) return;
+  state.tasks = state.tasks.map(t => t.id===id ? {...t, time: d.time||"—", title:d.title.trim(), detail:d.detail.trim(), people:d.people} : t)
+    .sort((a,b)=>a.time.localeCompare(b.time));
+  ui.editingId = null;
+  saveState(); render();
+}
+
+function renderAddForm() {
+  const el = document.getElementById("new-people");
+  el.innerHTML = state.roster.map(name => {
+    const active = ui.newPeople.includes(name);
+    const c = colorFor(name);
+    return `<button type="button" class="chip" style="font-size:11px;border-color:${c};color:${active?'#fff':c};background:${active?c:c+'14'}" onclick="toggleNewPerson('${escapeHtml(name)}')">${escapeHtml(name)}</button>`;
+  }).join("");
+}
+function toggleNewPerson(name) {
+  ui.newPeople = ui.newPeople.includes(name) ? ui.newPeople.filter(n=>n!==name) : [...ui.newPeople, name];
+  render();
+  document.getElementById("new-title").focus();
+}
+document.getElementById("add-form").addEventListener("submit", function(e){
+  e.preventDefault();
+  const title = document.getElementById("new-title").value.trim();
+  if (!title) return;
+  const time = document.getElementById("new-time").value;
+  const task = { id: "t"+Date.now(), day: ui.day, time: time||"—", title, detail:"", people: ui.newPeople, status:"todo" };
+  state.tasks = [...state.tasks, task].sort((a,b)=>a.time.localeCompare(b.time));
+  ui.newPeople = [];
+  document.getElementById("new-title").value = "";
+  document.getElementById("new-time").value = "";
+  saveState(); render();
+});
+
+function downloadPersonPdf(name) {
+  const relevant = state.tasks.filter(t => t.people.length===0 || t.people.includes(name));
+  const sections = DAYS.map(d => ({...d, items: relevant.filter(t=>t.day===d.key).sort((a,b)=>a.time.localeCompare(b.time))})).filter(d=>d.items.length>0);
+  const win = window.open("", "_blank");
+  if (!win) { alert("Le navigateur a bloqué la fenêtre d'impression. Autorisez les pop-ups puis réessayez."); return; }
+  const daySectionsHtml = sections.map(d => `
+    <h2>${d.label} <span class="date">${d.date}</span></h2>
+    <table>
+      <thead><tr><th>Heure</th><th>Tâche</th><th>Détails</th><th>Statut</th></tr></thead>
+      <tbody>${d.items.map(t=>`
+        <tr>
+          <td class="time">${t.time}</td>
+          <td class="task">${escapeHtml(t.title)}</td>
+          <td class="detail">${escapeHtml(t.detail||"")}</td>
+          <td class="status status-${t.status}">${STATUS_LABEL[t.status]}</td>
+        </tr>`).join("")}</tbody>
+    </table>`).join("");
+  win.document.write(`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"/><title>Rétroplanning — ${escapeHtml(name)}</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,600;0,700;1,500&family=Caveat:wght@600&family=JetBrains+Mono:wght@400;600&display=swap');
+    *{box-sizing:border-box;} body{font-family:'JetBrains Mono',monospace;color:#3B2A1F;margin:0;padding:40px 44px;background:#F6F0E4;}
+    h1{font-family:'Fraunces',serif;font-weight:700;font-size:40px;text-transform:uppercase;letter-spacing:2px;margin:0 0 2px;color:#C15E26;}
+    .sub{font-family:'Caveat',cursive;color:#9C4A1C;font-size:22px;margin:0 0 26px;}
+    h2{font-family:'Fraunces',serif;font-weight:600;font-size:19px;margin:22px 0 8px;border-bottom:1px solid #E3D5BE;padding-bottom:6px;color:#7A3A16;}
+    h2 .date{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:400;color:#B08A63;}
+    table{width:100%;border-collapse:collapse;margin-bottom:6px;}
+    th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#B08A63;padding:6px 8px;border-bottom:1px solid #E3D5BE;}
+    td{font-size:12.5px;padding:8px;border-bottom:1px solid #EDE1CC;vertical-align:top;}
+    td.time{font-weight:700;color:#C15E26;white-space:nowrap;width:60px;}
+    td.task{font-family:sans-serif;font-weight:600;width:26%;color:#3B2A1F;}
+    td.detail{font-family:sans-serif;color:#6B5640;}
+    td.status{white-space:nowrap;width:80px;font-weight:700;font-size:11px;}
+    .status-todo{color:#B08A63;} .status-progress{color:#D9823E;} .status-done{color:#9C4A1C;}
+    footer{margin-top:30px;font-size:10px;color:#B0A896;font-family:sans-serif;}
+  </style></head><body>
+    <div class="sub" style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;color:#C15E26;border:1px solid #C15E2666;border-radius:999px;padding:3px 12px;display:inline-block;margin-bottom:14px;text-transform:uppercase;">Rétroplanning</div>
+    <h1>${escapeHtml(name)}</h1>
+    <p class="sub">Marie &amp; Lucas — Domaine de Bel-Air</p>
+    ${daySectionsHtml || "<p>Aucune tâche assignée.</p>"}
+    <footer>Généré depuis le planning partagé du mariage.</footer>
+  </body></html>`);
+  win.document.close(); win.focus();
+  setTimeout(()=>win.print(), 350);
+}
+
+init();
+</script>
+</body>
+</html>
