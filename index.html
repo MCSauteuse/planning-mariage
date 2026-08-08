@@ -1134,7 +1134,7 @@ function App() {
 
       {activeTab === "tache" && (
         <>
-          <nav style={styles.dayTabs}>
+          <nav className="day-tabs-scroll" style={styles.dayTabs}>
             {DAYS.map((d) => (
               <button key={d.key} onClick={() => setDay(d.key)} style={{ ...styles.dayTab, ...(day === d.key ? styles.dayTabActive : {}) }}>
                 {d.label} <span style={styles.dayTabDate}>{d.date}</span>
@@ -1443,7 +1443,7 @@ function App() {
 
       {activeTab === "overview" && (
         <>
-          <nav style={styles.dayTabs}>
+          <nav className="day-tabs-scroll" style={styles.dayTabs}>
             {DAYS.map((d) => (
               <button key={d.key} onClick={() => setDay(d.key)} style={{ ...styles.dayTab, ...(day === d.key ? styles.dayTabActive : {}) }}>
                 {d.label} <span style={styles.dayTabDate}>{d.date}</span>
@@ -1578,7 +1578,7 @@ function App() {
 
       {activeTab === "chambres" && logements && (
         <>
-          <nav style={styles.dayTabs}>
+          <nav className="day-tabs-scroll" style={styles.dayTabs}>
             <button onClick={() => setRoomFilter("all")} style={{ ...styles.dayTab, ...(roomFilter === "all" ? styles.dayTabActive : {}) }}>
               Toutes les nuits
             </button>
@@ -1694,7 +1694,7 @@ function App() {
 
       {activeTab === "transport" && cars && trains && (
         <>
-          <nav style={styles.dayTabs}>
+          <nav className="day-tabs-scroll" style={styles.dayTabs}>
             {TRANSPORT_DAYS.map((d) => (
               <button key={d.key} onClick={() => setTransportFilter(d.key)} style={{ ...styles.dayTab, ...(transportFilter === d.key ? styles.dayTabActive : {}) }}>
                 {d.label} <span style={styles.dayTabDate}>{d.date}</span>
@@ -2157,6 +2157,27 @@ function Fonts() {
 
 		padding-left: 0 !important;
 		padding-right: 0 !important;
+	  }
+	  
+	  .day-tabs-scroll {
+		justify-content: flex-start !important;
+		overflow-x: auto !important;
+		overflow-y: hidden;
+		-webkit-overflow-scrolling: touch;
+		width: 100%;
+		padding-left: 0;
+		padding-right: 0;
+		box-sizing: border-box;
+	  }
+
+	  .day-tabs-scroll > button {
+		flex: 0 0 180px !important;
+		width: 180px !important;
+		min-width: 180px !important;
+		max-width: 180px !important;
+		justify-content: center;
+		box-sizing: border-box;
+		white-space: nowrap;
 	  }
 	}
 
