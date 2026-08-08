@@ -2138,6 +2138,12 @@ function Fonts() {
 
       @media (max-width: 560px) {
         .vine-side { display: none; }
+		
+	    .top-tabs {
+		  justify-content: flex-start !important;
+		  overflow-x: auto;
+		  -webkit-overflow-scrolling: touch;
+		}
       }
 
       /* Animation d'ouverture — feuilles automnales */
@@ -2334,7 +2340,7 @@ const styles = {
   progressBarBg: { flex: 1, height: 6, borderRadius: 999, background: "#EDE1CC", overflow: "hidden" },
   progressBarFill: { height: "100%", background: "#C15E26", transition: "width 0.3s ease" },
   progressLabel: { fontSize: 11, color: "#B08A63", whiteSpace: "nowrap" },
-  topTabs: { display: "flex", justifyContent: "center", gap: 4, marginBottom: 18, borderBottom: "1px solid #E3D5BE", maxWidth: 1000, marginLeft: "auto", marginRight: "auto", flexWrap: "nowrap", overflowX: "auto" },
+  topTabs: { display: "flex", justifyContent: "center", gap: 4, marginBottom: 18, borderBottom: "1px solid #E3D5BE", width: "100%", maxWidth: 1000, marginLeft: "auto", marginRight: "auto", flexWrap: "nowrap", overflowX: "auto", boxSizing: "border-box", paddingLeft: 0, paddingRight: 0},
   topTab: { fontFamily: "system-ui, sans-serif", fontSize: 14.5, fontWeight: 700, padding: "10px 14px", border: "none", background: "transparent", color: "#B08A63", cursor: "pointer", borderBottom: "3px solid transparent", whiteSpace: "nowrap", flexShrink: 0 },
   topTabActive: { color: "#C15E26", borderBottom: "3px solid #C15E26" },
   dayTabs: { display: "flex", justifyContent: "center", gap: 10, marginBottom: 16 },
