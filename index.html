@@ -1281,7 +1281,7 @@ function App() {
               </div>
 			  <div style={{ ...styles.fieldGroup, flex: "0 0 100%" }}>
 				  <label style={styles.fieldLabel}>Assignés</label>
-				  <div style={styles.editPeopleRow}>
+				    <div style={styles.addTaskPeopleRow}>
 					<button
 					  type="button"
 					  onClick={() => setNewPeople([])}
@@ -2223,6 +2223,33 @@ function Fonts() {
 	  }
 	}
 
+	  .task-assignees {
+		display: flex !important;
+		flex-wrap: wrap !important;
+		justify-content: flex-start !important;
+		gap: 6px !important;
+	  }
+
+	  .task-add-btn {
+		width: 100% !important;
+		margin-top: 10px !important;
+	  }
+	  
+	  .editPeopleRow: {
+		display: "flex",
+		flexWrap: "wrap",
+		gap: 6,
+		marginBottom: 0,
+		justifyContent: "flex-start"
+	  },
+
+	  .addTaskPeopleRow: {
+		display: "flex",
+		flexWrap: "wrap",
+		gap: 6,
+		justifyContent: "flex-start"
+	  },
+
       /* Animation d'ouverture — feuilles automnales */
       #falling-leaves {
         position: fixed;
@@ -2462,6 +2489,7 @@ const styles = {
   editDetailInput: { fontFamily: "sans-serif", fontSize: 12, padding: "6px 8px", borderRadius: 6, border: "1px solid #E3D5BE", width: "100%", resize: "vertical", marginBottom: 8, boxSizing: "border-box" },
   editDetailInputSingle: { fontFamily: "sans-serif", fontSize: 12, padding: "8px 10px", borderRadius: 6, border: "1px solid #E3D5BE", width: "100%", marginBottom: 8, boxSizing: "border-box", height: 36 },
   editPeopleRow: { display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 8, justifyContent: "flex-start" },
+  addTaskPeopleRow: { display: "flex", flexWrap: "wrap", gap: 6, justifyContent: "flex-start"},
   personChip: { fontFamily: "'JetBrains Mono', monospace", fontSize: 11, fontWeight: 600, padding: "7px 14px", borderRadius: 999, border: "1px solid", cursor: "pointer" },
   saveBtn: { fontFamily: "'JetBrains Mono', monospace", fontSize: 11, fontWeight: 600, color: "#fff", background: "#9C4A1C", border: "1px solid #9C4A1C", borderRadius: 6, padding: "5px 10px", cursor: "pointer" },
   cancelBtn: { fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: "#9C7B52", background: "#fff", border: "1px solid #E3D5BE", borderRadius: 6, padding: "5px 10px", cursor: "pointer" },
