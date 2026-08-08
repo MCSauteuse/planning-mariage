@@ -69,9 +69,90 @@
   .setup code { background:#F0E4CE; padding:2px 6px; border-radius:4px; font-size:13px; }
   .setup ol { padding-left:20px; }
   .setup textarea { width:100%; min-height:120px; font-family:monospace; font-size:12px; padding:10px; border-radius:8px; border:1px solid #E3D5BE; }
+
+  /* Animation d'ouverture — feuilles automnales */
+  #falling-leaves {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 9999;
+  }
+
+  .falling-leaf {
+    position: absolute;
+    top: -45px;
+    width: 18px;
+    height: 12px;
+    opacity: 0;
+    transform-origin: 50% 50%;
+    animation-name: leaf-fall;
+    animation-timing-function: ease-in;
+    animation-fill-mode: forwards;
+  }
+
+  .falling-leaf::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--leaf-color);
+    border-radius: 100% 0 100% 0;
+    transform: rotate(-25deg);
+    box-shadow: 5px 0 0 -4px var(--leaf-color);
+  }
+
+  .falling-leaf.leaf-wide::before {
+    border-radius: 100% 15% 100% 15%;
+    transform: rotate(12deg) scaleX(1.15);
+  }
+
+  .falling-leaf.leaf-small::before {
+    border-radius: 100% 0 100% 0;
+    transform: rotate(42deg) scale(.72);
+  }
+
+  .falling-leaf::after {
+    content: "";
+    position: absolute;
+    width: 1px;
+    height: 9px;
+    background: rgba(59,42,31,.35);
+    left: 9px;
+    top: 5px;
+    transform: rotate(-25deg);
+    transform-origin: top;
+  }
+
+  @keyframes leaf-fall {
+    0% {
+      opacity: 0;
+      transform: translate3d(0, -20px, 0) rotate(0deg);
+    }
+    10% {
+      opacity: .9;
+    }
+    45% {
+      transform: translate3d(var(--drift-1), 45vh, 0) rotate(var(--rotation-1));
+    }
+    75% {
+      transform: translate3d(var(--drift-2), 78vh, 0) rotate(var(--rotation-2));
+    }
+    100% {
+      opacity: 0;
+      transform: translate3d(var(--drift-3), 115vh, 0) rotate(var(--rotation-3));
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #falling-leaves {
+      display: none;
+    }
+  }
+
 </style>
 </head>
 <body>
+<div id="falling-leaves" aria-hidden="true"></div>
 <div id="setup-screen" class="setup" style="display:none;">
   <h2>Configuration initiale (une seule fois)</h2>
   <p>Ce fichier a besoin d'une base <strong>Firebase</strong> gratuite pour synchroniser le planning entre tout le monde, sans que vos témoins aient besoin d'un compte.</p>
@@ -446,6 +527,49 @@ function downloadPersonPdf(name) {
   win.document.close(); win.focus();
   setTimeout(()=>win.print(), 350);
 }
+
+
+function playLeafAnimation() {
+  const container = document.getElementById("falling-leaves");
+  if (!container) return;
+
+  const colors = ["#C15E26", "#D9823E", "#E08A4F", "#9C4A1C", "#B14E1A"];
+  const leafCount = 22;
+
+  for (let i = 0; i < leafCount; i++) {
+    const leaf = document.createElement("span");
+    leaf.className = "falling-leaf";
+    const shape = Math.random();
+    if (shape < 0.25) leaf.classList.add("leaf-small");
+    else if (shape < 0.55) leaf.classList.add("leaf-wide");
+
+    const startX = Math.random() * 100;
+    const size = 11 + Math.random() * 13;
+    const duration = 2.1 + Math.random() * 1.4;
+    const delay = Math.random() * 0.8;
+
+    leaf.style.left = startX + "vw";
+    leaf.style.width = size + "px";
+    leaf.style.height = (size * 0.68) + "px";
+    leaf.style.setProperty("--leaf-color", colors[Math.floor(Math.random() * colors.length)]);
+    leaf.style.setProperty("--drift-1", (-60 + Math.random() * 120) + "px");
+    leaf.style.setProperty("--drift-2", (-90 + Math.random() * 180) + "px");
+    leaf.style.setProperty("--drift-3", (-130 + Math.random() * 260) + "px");
+    leaf.style.setProperty("--rotation-1", (120 + Math.random() * 240) + "deg");
+    leaf.style.setProperty("--rotation-2", (240 + Math.random() * 360) + "deg");
+    leaf.style.setProperty("--rotation-3", (420 + Math.random() * 600) + "deg");
+    leaf.style.animationDuration = duration + "s";
+    leaf.style.animationDelay = delay + "s";
+
+    container.appendChild(leaf);
+
+    leaf.addEventListener("animationend", () => leaf.remove(), { once: true });
+  }
+
+  setTimeout(() => container.remove(), 5000);
+}
+
+playLeafAnimation();
 
 init();
 </script>
