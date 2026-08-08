@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Organisation du mariage — Marie &amp; Lucas</title>
-<link rel="icon" type="image/png" href="favicon_marie_lucas.png?v=2">
+<link rel="icon" type="image/png" href="./favicon_marie_lucas_transparent_64.png?v=5">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,600;0,700;1,500&family=Caveat:wght@500;600&family=JetBrains+Mono:wght@400;500;600&display=swap');
   * { box-sizing: border-box; }
@@ -150,6 +150,21 @@
     }
   }
 
+
+  .wedding-mark {
+    display: block;
+    width: min(360px, 72vw);
+    height: auto;
+    margin: 0 auto 8px;
+  }
+
+  @media (max-width: 600px) {
+    .wedding-mark {
+      width: min(270px, 78vw);
+      margin-bottom: 6px;
+    }
+  }
+
 </style>
 </head>
 <body>
@@ -169,6 +184,7 @@
 
 <div id="app" class="wrap" style="display:none;">
   <header class="header">
+    <img class="wedding-mark" src="./logo_marie_lucas.png" alt="Marie &amp; Lucas, monogramme avec feuilles automnales" />
     <p class="monogram">Marie &amp; Lucas</p>
     <div class="stamp" id="stamp"></div>
     <h1 class="title">Organisation du mariage</h1>
