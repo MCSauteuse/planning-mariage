@@ -2136,15 +2136,29 @@ function Fonts() {
     <style>{`
       @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,600;0,700;1,500&family=Caveat:wght@500;600&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
-      @media (max-width: 560px) {
-        .vine-side { display: none; }
-		
-	    .top-tabs {
-		  justify-content: flex-start !important;
-		  overflow-x: auto;
-		  -webkit-overflow-scrolling: touch;
-		}
-      }
+	@media (max-width: 560px) {
+	  .vine-side {
+		display: none;
+	  }
+
+	  .top-tabs {
+		display: flex !important;
+		width: 100% !important;
+		max-width: none !important;
+		margin-left: 0 !important;
+		margin-right: 0 !important;
+
+		justify-content: flex-start !important;
+		flex-wrap: nowrap !important;
+
+		overflow-x: auto !important;
+		overflow-y: hidden;
+		-webkit-overflow-scrolling: touch;
+
+		padding-left: 0 !important;
+		padding-right: 0 !important;
+	  }
+	}
 
       /* Animation d'ouverture — feuilles automnales */
       #falling-leaves {
