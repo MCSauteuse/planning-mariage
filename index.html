@@ -1124,7 +1124,7 @@ function App() {
         </button>
       </header>
 
-      <nav style={styles.topTabs}>
+      <nav className="top-tabs" style={styles.topTabs}>
         {visibleTabs.map((tb) => (
           <button key={tb.key} onClick={() => setActiveTab(tb.key)} style={{ ...styles.topTab, ...(activeTab === tb.key ? styles.topTabActive : {}) }}>
             {tb.label}
