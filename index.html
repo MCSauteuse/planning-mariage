@@ -274,6 +274,7 @@ const DAYS = [
   { key: "jourJ", label: "Jour J", date: "26.09.26" },
   { key: "lendemain", label: "Lendemain", date: "27.09.26" },
 ];
+const LODGING_DAYS = DAYS.filter((d) => d.key !== "lendemain");
 const TRANSPORT_DAYS = [
   { key: "veille", label: "Veille", date: "25.09.26" },
   { key: "jourJ", label: "Jour J", date: "26.09.26" },
@@ -1624,7 +1625,7 @@ function App() {
             <button onClick={() => setRoomFilter("all")} style={{ ...styles.dayTab, ...(roomFilter === "all" ? styles.dayTabActive : {}) }}>
               Toutes les nuits
             </button>
-            {DAYS.map((d) => (
+            {LODGING_DAYS.map((d) => (
               <button key={d.key} onClick={() => setRoomFilter(d.key)} style={{ ...styles.dayTab, ...(roomFilter === d.key ? styles.dayTabActive : {}) }}>
                 {d.label} <span style={styles.dayTabDate}>{d.date}</span>
               </button>
