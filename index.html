@@ -276,8 +276,12 @@ const DEFAULT_CARS = [
 const DEFAULT_TRAINS = [
   { id: "t1", day: "veille", heure: "13:45", personnes: ["Laurie"], telephone: "", gare: "Gare du Mans", carId: "v1", commentaire: "Exemple à modifier ou supprimer", exemple: true },
 ];
+const DEFAULT_COVOIT_DEMANDES = [
+  { id: "cd1", day: "veille", heure: "12:00", personnes: ["Marion"], telephone: "06 22 33 44 55", depart: "Paris", arrivee: "Domaine de Bel-Air", placesRecherchees: 1, carId: "", commentaire: "Exemple à modifier ou supprimer", exemple: true },
+];
 const TRANSPORT_STORAGE_KEY = "planning-mariage-transport-voitures";
 const TRAINS_STORAGE_KEY = "planning-mariage-transport-trains";
+const COVOIT_DEMANDES_STORAGE_KEY = "planning-mariage-transport-demandes";
 const DAYS = [
   { key: "veille", label: "Veille", date: "25.09.26" },
   { key: "jourJ", label: "Jour J", date: "26.09.26" },
@@ -443,6 +447,8 @@ function App() {
   const [newCarPlaces, setNewCarPlaces] = useState("");
   const [newCarPassengers, setNewCarPassengers] = useState("");
   const [newCarComment, setNewCarComment] = useState("");
+  const [newCarSelectedTrainIds, setNewCarSelectedTrainIds] = useState([]);
+  const [newCarSelectedDemandeIds, setNewCarSelectedDemandeIds] = useState([]);
   const [carEditingId, setCarEditingId] = useState(null);
   const [carEditDraft, setCarEditDraft] = useState({ day: "veille", conducteur: "", telephone: "", depart: "", arrivee: "", places: "", passagers: "", commentaire: "" });
   const [newTrainTime, setNewTrainTime] = useState("");
@@ -453,6 +459,17 @@ function App() {
   const [newTrainComment, setNewTrainComment] = useState("");
   const [trainEditingId, setTrainEditingId] = useState(null);
   const [trainEditDraft, setTrainEditDraft] = useState({ day: "veille", heure: "", personnes: "", telephone: "", gare: "", carId: "", commentaire: "" });
+  const [covoitDemandes, setCovoitDemandes] = useState(null);
+  const [newDemandeTime, setNewDemandeTime] = useState("");
+  const [newDemandePersons, setNewDemandePersons] = useState("");
+  const [newDemandePhone, setNewDemandePhone] = useState("");
+  const [newDemandeDepart, setNewDemandeDepart] = useState("");
+  const [newDemandeArrivee, setNewDemandeArrivee] = useState("");
+  const [newDemandePlaces, setNewDemandePlaces] = useState("");
+  const [newDemandeComment, setNewDemandeComment] = useState("");
+  const [newDemandeCarId, setNewDemandeCarId] = useState("");
+  const [demandeEditingId, setDemandeEditingId] = useState(null);
+  const [demandeEditDraft, setDemandeEditDraft] = useState({ day: "veille", heure: "", personnes: "", telephone: "", depart: "", arrivee: "", placesRecherchees: "", carId: "", commentaire: "" });
   const [day, setDay] = useState("veille");
   const [personFilter, setPersonFilter] = useState([]);
   const [showPersonMenu, setShowPersonMenu] = useState(false);
@@ -466,6 +483,8 @@ function App() {
   const [showBulkImport, setShowBulkImport] = useState(false);
   const [bulkTaskText, setBulkTaskText] = useState("");
   const [bulkProgrammeText, setBulkProgrammeText] = useState("");
+  const [subItemTargetId, setSubItemTargetId] = useState("");
+  const [bulkSubItemText, setBulkSubItemText] = useState("");
   const [bulkAnnuaireText, setBulkAnnuaireText] = useState("");
   const [guestProgramme, setGuestProgramme] = useState(null);
   const [cagnotte, setCagnotte] = useState(null);
@@ -500,7 +519,7 @@ function App() {
     let cancelled = false;
     (async () => {
       try {
-        const [t, r, c, tr, lg, pg, an, gp, cg] = await Promise.all([
+        const [t, r, c, tr, lg, pg, an, gp, cg, cd] = await Promise.all([
           window.storage.get(STORAGE_KEY, true).catch(() => null),
           window.storage.get(ROSTER_KEY, true).catch(() => null),
           window.storage.get(TRANSPORT_STORAGE_KEY, true).catch(() => null),
@@ -510,6 +529,7 @@ function App() {
           window.storage.get(ANNUAIRE_STORAGE_KEY, true).catch(() => null),
           window.storage.get(GUEST_PROGRAMME_STORAGE_KEY, true).catch(() => null),
           window.storage.get(CAGNOTTE_STORAGE_KEY, true).catch(() => null),
+          window.storage.get(COVOIT_DEMANDES_STORAGE_KEY, true).catch(() => null),
         ]);
         if (!cancelled) {
           setTasks(t ? JSON.parse(t.value) : DEFAULT_TASKS);
@@ -521,6 +541,7 @@ function App() {
           setAnnuaire(an ? JSON.parse(an.value) : DEFAULT_ANNUAIRE);
           setGuestProgramme(gp ? JSON.parse(gp.value) : DEFAULT_GUEST_PROGRAMME);
           setCagnotte(cg ? JSON.parse(cg.value) : DEFAULT_CAGNOTTE);
+          setCovoitDemandes(cd ? JSON.parse(cd.value) : DEFAULT_COVOIT_DEMANDES);
         }
       } catch {
         if (!cancelled) {
@@ -533,6 +554,7 @@ function App() {
           setAnnuaire(DEFAULT_ANNUAIRE);
           setGuestProgramme(DEFAULT_GUEST_PROGRAMME);
           setCagnotte(DEFAULT_CAGNOTTE);
+          setCovoitDemandes(DEFAULT_COVOIT_DEMANDES);
         }
       }
     })();
@@ -556,6 +578,7 @@ function App() {
   const updateRoster = (next) => { setRoster(next); persist(ROSTER_KEY, next); };
   const updateCars = (next) => { setCars(next); persist(TRANSPORT_STORAGE_KEY, next); };
   const updateTrains = (next) => { setTrains(next); persist(TRAINS_STORAGE_KEY, next); };
+  const updateCovoitDemandes = (next) => { setCovoitDemandes(next); persist(COVOIT_DEMANDES_STORAGE_KEY, next); };
   const updateLogements = (next) => { const normalized = normalizeLogements(next); setLogements(normalized); persist(LOGEMENTS_STORAGE_KEY, normalized); };
   const updateProgramme = (next) => { setProgramme(next); persist(PROGRAMME_STORAGE_KEY, next); };
   const updateAnnuaire = (next) => { setAnnuaire(next); persist(ANNUAIRE_STORAGE_KEY, next); };
@@ -585,6 +608,22 @@ function App() {
     } catch {
       setLogementsSaveError("JSON invalide — vérifiez les virgules et les guillemets.");
     }
+  };
+  const importBulkSubItems = () => {
+    if (!subItemTargetId) return;
+    const lines = bulkSubItemText.split("\n").map((l) => l.trim()).filter(Boolean);
+    if (lines.length === 0) return;
+    const newSubItems = lines.map((line) => {
+      const parts = line.split("|").map((p) => p.trim());
+      const [time, who, room] = parts;
+      return { time: time || "—", who: who || line, room: room || "" };
+    });
+    const merged = programme.map((it) =>
+      it.id === subItemTargetId ? { ...it, subItems: [...(it.subItems || []), ...newSubItems] } : it
+    );
+    updateProgramme(merged);
+    setProgrammeDraftText(JSON.stringify(merged, null, 2));
+    setBulkSubItemText("");
   };
   const saveProgrammeEdit = () => {
     try {
@@ -630,14 +669,19 @@ function App() {
   };
 
   const trainPickupsForCar = (carId, trainList) => (trainList || trains || []).filter((t) => t.carId === carId);
-  const seatsTaken = (car, trainList) => car.passagers.length + trainPickupsForCar(car.id, trainList).reduce((sum, t) => sum + t.personnes.length, 0);
-  const seatsLeft = (car, trainList) => car.places - seatsTaken(car, trainList);
+  const demandesForCar = (carId, demandeList) => (demandeList || covoitDemandes || []).filter((d) => d.carId === carId);
+  const seatsTaken = (car, trainList, demandeList) =>
+    car.passagers.length +
+    trainPickupsForCar(car.id, trainList).reduce((sum, t) => sum + t.personnes.length, 0) +
+    demandesForCar(car.id, demandeList).reduce((sum, d) => sum + (parseInt(d.placesRecherchees, 10) || 1), 0);
+  const seatsLeft = (car, trainList, demandeList) => car.places - seatsTaken(car, trainList, demandeList);
 
   const addCar = () => {
     if (!newCarDriver.trim()) return;
     const places = parseInt(newCarPlaces, 10);
+    const carId = `car${Date.now()}`;
     const car = {
-      id: `car${Date.now()}`,
+      id: carId,
       day: transportFilter,
       conducteur: newCarDriver.trim(),
       telephone: newCarPhone.trim(),
@@ -648,11 +692,19 @@ function App() {
       commentaire: newCarComment.trim(),
     };
     updateCars([...(cars || []), car]);
+    if (newCarSelectedTrainIds.length > 0) {
+      updateTrains((trains || []).map((t) => (newCarSelectedTrainIds.includes(t.id) ? { ...t, carId } : t)));
+    }
+    if (newCarSelectedDemandeIds.length > 0) {
+      updateCovoitDemandes((covoitDemandes || []).map((d) => (newCarSelectedDemandeIds.includes(d.id) ? { ...d, carId } : d)));
+    }
     setNewCarDriver(""); setNewCarPhone(""); setNewCarDepart(""); setNewCarArrivee(""); setNewCarPlaces(""); setNewCarPassengers(""); setNewCarComment("");
+    setNewCarSelectedTrainIds([]); setNewCarSelectedDemandeIds([]);
   };
   const removeCar = (id) => {
     updateCars((cars || []).filter((c) => c.id !== id));
     updateTrains((trains || []).map((t) => (t.carId === id ? { ...t, carId: "" } : t)));
+    updateCovoitDemandes((covoitDemandes || []).map((d) => (d.carId === id ? { ...d, carId: "" } : d)));
   };
 
   const startCarEdit = (car) => {
@@ -691,7 +743,82 @@ function App() {
     );
     // If the car's day changed, unlink any train pickups that no longer match
     updateTrains((trains || []).map((t) => (t.carId === id && t.day !== carEditDraft.day ? { ...t, carId: "" } : t)));
+    updateCovoitDemandes((covoitDemandes || []).map((d) => (d.carId === id && d.day !== carEditDraft.day ? { ...d, carId: "" } : d)));
     setCarEditingId(null);
+  };
+
+  const addDemande = () => {
+    const personnes = newDemandePersons.split(",").map((s) => s.trim()).filter(Boolean);
+    if (!newDemandeDepart.trim() || !newDemandeArrivee.trim()) return;
+    const demande = {
+      id: `dem${Date.now()}`,
+      day: transportFilter,
+      heure: newDemandeTime || "—",
+      personnes,
+      telephone: newDemandePhone.trim(),
+      depart: newDemandeDepart.trim(),
+      arrivee: newDemandeArrivee.trim(),
+      placesRecherchees: parseInt(newDemandePlaces, 10) || Math.max(1, personnes.length),
+      carId: newDemandeCarId || "",
+      commentaire: newDemandeComment.trim(),
+    };
+    updateCovoitDemandes([...(covoitDemandes || []), demande].sort((a, b) => a.heure.localeCompare(b.heure)));
+    setNewDemandeTime(""); setNewDemandePersons(""); setNewDemandePhone(""); setNewDemandeDepart(""); setNewDemandeArrivee(""); setNewDemandePlaces(""); setNewDemandeComment(""); setNewDemandeCarId("");
+  };
+  const removeDemande = (id) => updateCovoitDemandes((covoitDemandes || []).filter((d) => d.id !== id));
+
+  const startDemandeEdit = (d) => {
+    setDemandeEditingId(d.id);
+    setDemandeEditDraft({
+      day: d.day,
+      heure: d.heure === "—" ? "" : d.heure,
+      personnes: d.personnes.join(", "),
+      telephone: d.telephone || "",
+      depart: d.depart || "",
+      arrivee: d.arrivee || "",
+      placesRecherchees: String(d.placesRecherchees || 1),
+      carId: d.carId || "",
+      commentaire: d.commentaire || "",
+    });
+  };
+  const cancelDemandeEdit = () => setDemandeEditingId(null);
+  const saveDemandeEdit = (id) => {
+    if (!demandeEditDraft.depart.trim() || !demandeEditDraft.arrivee.trim()) return;
+    const places = parseInt(demandeEditDraft.placesRecherchees, 10);
+    updateCovoitDemandes(
+      (covoitDemandes || [])
+        .map((d) =>
+          d.id === id
+            ? {
+                ...d,
+                day: demandeEditDraft.day,
+                heure: demandeEditDraft.heure || "—",
+                personnes: demandeEditDraft.personnes.split(",").map((s) => s.trim()).filter(Boolean),
+                telephone: demandeEditDraft.telephone.trim(),
+                depart: demandeEditDraft.depart.trim(),
+                arrivee: demandeEditDraft.arrivee.trim(),
+                placesRecherchees: Number.isFinite(places) && places > 0 ? places : d.placesRecherchees,
+                carId: demandeEditDraft.carId,
+                commentaire: demandeEditDraft.commentaire.trim(),
+              }
+            : d
+        )
+        .sort((a, b) => a.heure.localeCompare(b.heure))
+    );
+    setDemandeEditingId(null);
+  };
+  const assignDemandeToCar = (demandeId, carId) => {
+    updateCovoitDemandes((covoitDemandes || []).map((d) => (d.id === demandeId ? { ...d, carId } : d)));
+  };
+  const movePassenger = (fromCarId, name, toCarId) => {
+    if (!toCarId || toCarId === fromCarId) return;
+    updateCars(
+      (cars || []).map((c) => {
+        if (c.id === fromCarId) return { ...c, passagers: c.passagers.filter((p) => p !== name) };
+        if (c.id === toCarId) return { ...c, passagers: [...c.passagers, name] };
+        return c;
+      })
+    );
   };
 
   const addTrain = () => {
@@ -965,8 +1092,13 @@ function App() {
     const voituresHtml = filteredCars.length
       ? filteredCars.map((v) => {
           const pickups = trainPickupsForCar(v.id, trains);
-          const allOccupants = [...v.passagers, ...pickups.map((p) => `${p.personnes.join(" & ")} (train)`)];
-          const left = seatsLeft(v, trains);
+          const carDemandes = demandesForCar(v.id, covoitDemandes);
+          const allOccupants = [
+            ...v.passagers,
+            ...pickups.map((p) => `${p.personnes.join(" & ")} (train)`),
+            ...carDemandes.map((d) => `${d.personnes.length ? d.personnes.join(" & ") : d.placesRecherchees + " place(s)"} (covoit)`),
+          ];
+          const left = seatsLeft(v, trains, covoitDemandes);
           return `<tr>
           <td style="font-weight:700;color:#C15E26;">${escapeHtml(v.conducteur)}${v.telephone ? `<br/><span style="font-weight:400;color:#B08A63;font-size:10px;">${escapeHtml(v.telephone)}</span>` : ""}</td>
           <td>${escapeHtml(v.depart || "—")}</td>
@@ -994,6 +1126,21 @@ function App() {
         }).join("")
       : `<tr><td colspan="5" style="color:#B08A63;font-style:italic;">Aucun train pour ce filtre</td></tr>`;
 
+    const filteredDemandes = (covoitDemandes || []).filter((d) => d.day === transportFilter);
+    const demandesHtml = filteredDemandes.length
+      ? filteredDemandes.map((d) => {
+          const car = (cars || []).find((c) => c.id === d.carId);
+          const pickupLabel = d.carId === "none" ? "Pas besoin de voiture" : car ? escapeHtml(car.conducteur) : "En attente de voiture";
+          return `<tr>
+          <td class="time">${d.heure}</td>
+          <td style="font-weight:700;color:#C15E26;">${escapeHtml(d.personnes.length ? d.personnes.join(", ") : `${d.placesRecherchees} place(s)`)}${d.telephone ? `<br/><span style="font-weight:400;color:#B08A63;font-size:10px;">${escapeHtml(d.telephone)}</span>` : ""}</td>
+          <td>${escapeHtml(d.depart)} → ${escapeHtml(d.arrivee)}</td>
+          <td>${pickupLabel}</td>
+          <td>${escapeHtml(d.commentaire || "")}</td>
+        </tr>`;
+        }).join("")
+      : `<tr><td colspan="5" style="color:#B08A63;font-style:italic;">Aucune demande pour ce filtre</td></tr>`;
+
     const body = `
       <div class="stamp">Transport</div>
       <h1>Voitures &amp; Trains</h1>
@@ -1002,6 +1149,8 @@ function App() {
       <table><thead><tr><th>Conducteur</th><th>Départ</th><th>Arrivée</th><th>Places</th><th>Occupants</th><th>Restantes</th><th>Commentaire</th></tr></thead><tbody>${voituresHtml}</tbody></table>
       <h2>Trains</h2>
       <table><thead><tr><th>Heure</th><th>Personne(s)</th><th>Gare</th><th>Récupéré par</th><th>Commentaire</th></tr></thead><tbody>${trainsHtml}</tbody></table>
+      <h2>Recherches de covoiturage</h2>
+      <table><thead><tr><th>Heure</th><th>Personne(s)</th><th>Trajet</th><th>Voiture</th><th>Commentaire</th></tr></thead><tbody>${demandesHtml}</tbody></table>
       <footer>Généré depuis le planning partagé du mariage.</footer>`;
     openPrintWindow(body, "Transports");
   };
@@ -1461,6 +1610,31 @@ function App() {
                     <button onClick={importBulkProgramme} style={styles.saveBtn}>Ajouter ces étapes</button>
                   </div>
 
+                                    <h3 style={{ ...styles.addFormTitle, marginTop: 20 }}>Ajouter des lignes dans une étape existante</h3>
+                  <p style={styles.pdfLabel}>
+                    Choisissez l'étape, puis une ligne par personne au format <code>heure | qui | chambre</code> :
+                  </p>
+                  <select
+                    value={subItemTargetId}
+                    onChange={(e) => setSubItemTargetId(e.target.value)}
+                    style={{ ...styles.textInput, width: "100%", maxWidth: 400, marginBottom: 10 }}
+                  >
+                    <option value="">— Choisir une étape —</option>
+                    {programme.map((it) => (
+                      <option key={it.id} value={it.id}>{it.time} — {it.title}</option>
+                    ))}
+                  </select>
+                  <textarea
+                    value={bulkSubItemText}
+                    onChange={(e) => setBulkSubItemText(e.target.value)}
+                    placeholder={"09:00 | Fanny - Coiffure | C. BAUDELAIRE\n09:15 | Fanny - Maquillage | Comtesse de SEGUR"}
+                    style={styles.logementsJsonEditor}
+                    spellCheck={false}
+                  />
+                  <div style={styles.cardActions}>
+                    <button onClick={importBulkSubItems} style={styles.saveBtn}>Ajouter à cette étape</button>
+                  </div>
+
                   <h3 style={{ ...styles.addFormTitle, marginTop: 20 }}>Ou modifier tout le détail (JSON)</h3>
                   <p style={styles.pdfLabel}>
                     Pour renommer, supprimer, réordonner ou ajouter des sous-étapes (heure/qui/chambre), éditez directement ici :
@@ -1723,7 +1897,9 @@ function App() {
             <h2 style={styles.overviewTitle}>Voitures</h2>
             {cars.filter((v) => v.day === transportFilter).map((v) => {
               const pickups = trainPickupsForCar(v.id, trains);
-              const left = seatsLeft(v, trains);
+              const carDemandes = demandesForCar(v.id, covoitDemandes);
+              const pendingDemandes = (covoitDemandes || []).filter((d) => d.day === transportFilter && !d.carId);
+              const left = seatsLeft(v, trains, covoitDemandes);
 
               if (carEditingId === v.id) {
                 return (
@@ -1763,7 +1939,7 @@ function App() {
                     )}
                     <div style={styles.seatsGaugeWrap}>
                       <div style={styles.seatsGaugeBg}>
-                        <div style={{ ...styles.seatsGaugeFill, width: `${Math.min(100, (seatsTaken(v, trains) / v.places) * 100)}%`, background: left > 0 ? "#6B8F71" : "#B45252" }} />
+                        <div style={{ ...styles.seatsGaugeFill, width: `${Math.min(100, (seatsTaken(v, trains, covoitDemandes) / v.places) * 100)}%`, background: left > 0 ? "#6B8F71" : "#B45252" }} />
                       </div>
                       <span style={styles.seatsGaugeLabel}>{left}/{v.places}</span>
                     </div>
@@ -1771,16 +1947,60 @@ function App() {
                     <button onClick={() => removeCar(v.id)} style={{ ...styles.carIconBtn, ...styles.carDeleteIconBtn }} aria-label="Supprimer la voiture">✕</button>
                   </div>
                   <div style={{ ...styles.transportRoute, fontSize: 13.5, marginLeft: 0 }}>
-                    {v.passagers.length > 0 && <span>{v.passagers.join(", ")}</span>}
+                    {v.passagers.length > 0 && (
+                      <span style={styles.passengerChipRow}>
+                        {v.passagers.map((name) => {
+                          const otherCars = cars.filter((c) => c.day === v.day && c.id !== v.id);
+                          return (
+                            <span key={name} style={styles.passengerChip}>
+                              {name}
+                              {otherCars.length > 0 ? (
+                                <select
+                                  value=""
+                                  onChange={(e) => movePassenger(v.id, name, e.target.value)}
+                                  style={styles.passengerMoveSelect}
+                                  aria-label={`Déplacer ${name}`}
+                                >
+                                  <option value="">🚗🔄</option>
+                                  {otherCars.map((c) => (
+                                    <option key={c.id} value={c.id}>→ {c.conducteur}</option>
+                                  ))}
+                                </select>
+                              ) : (
+                                <span style={styles.passengerMoveDisabled} title="Ajoutez une autre voiture pour ce jour pour pouvoir déplacer">🚗🔄</span>
+                              )}
+                            </span>
+                          );
+                        })}
+                      </span>
+                    )}
                     {pickups.length > 0 && (
                       <span>
                         {v.passagers.length > 0 ? " · " : ""}
                         {pickups.map((p) => `${p.personnes.join(" & ")} (train ${p.heure})`).join(", ")}
                       </span>
                     )}
-                    {v.passagers.length === 0 && pickups.length === 0 && <em style={{ color: "#C7A87E" }}>Aucun passager pour l'instant</em>}
+                    {carDemandes.length > 0 && (
+                      <span>
+                        {(v.passagers.length > 0 || pickups.length > 0) ? " · " : ""}
+                        {carDemandes.map((d) => `${d.personnes.length ? d.personnes.join(" & ") : d.placesRecherchees + " place(s)"} (covoit ${d.heure})`).join(", ")}
+                      </span>
+                    )}
+                    {v.passagers.length === 0 && pickups.length === 0 && carDemandes.length === 0 && <em style={{ color: "#C7A87E" }}>Aucun passager pour l'instant</em>}
                   </div>
                   {v.commentaire && <div style={styles.commentLine}>💬 {v.commentaire}</div>}
+                  {pendingDemandes.length > 0 && left > 0 && (
+                    <div style={styles.pendingDemandesBox}>
+                      <span style={styles.pendingDemandesLabel}>Demandes en attente à ajouter dans cette voiture :</span>
+                      <div style={styles.pendingDemandesList}>
+                        {pendingDemandes.map((d) => (
+                          <button key={d.id} onClick={() => assignDemandeToCar(d.id, v.id)} style={styles.pendingDemandeChip}>
+                            + {d.personnes.length ? d.personnes.join(" & ") : `${d.placesRecherchees} place(s)`} ({d.depart} → {d.arrivee}, {d.heure})
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               );
             })}
@@ -1822,6 +2042,39 @@ function App() {
                   <button type="button" onClick={addCar} style={styles.addBtn}>Ajouter</button>
                 </div>
               </div>
+
+              {(trains.filter((t) => t.day === transportFilter && !t.carId).length > 0 ||
+                (covoitDemandes || []).filter((d) => d.day === transportFilter && !d.carId).length > 0) && (
+                <div style={{ marginTop: 14 }}>
+                  <p style={styles.pdfLabel}>Rattacher directement des trains/demandes en attente à cette voiture :</p>
+                  <div style={styles.pendingDemandesList}>
+                    {trains.filter((t) => t.day === transportFilter && !t.carId).map((t) => (
+                      <label key={t.id} style={styles.pendingCheckboxChip}>
+                        <input
+                          type="checkbox"
+                          checked={newCarSelectedTrainIds.includes(t.id)}
+                          onChange={() =>
+                            setNewCarSelectedTrainIds((prev) => (prev.includes(t.id) ? prev.filter((id) => id !== t.id) : [...prev, t.id]))
+                          }
+                        />
+                        🚆 {t.personnes.join(" & ")} ({t.heure})
+                      </label>
+                    ))}
+                    {(covoitDemandes || []).filter((d) => d.day === transportFilter && !d.carId).map((d) => (
+                      <label key={d.id} style={styles.pendingCheckboxChip}>
+                        <input
+                          type="checkbox"
+                          checked={newCarSelectedDemandeIds.includes(d.id)}
+                          onChange={() =>
+                            setNewCarSelectedDemandeIds((prev) => (prev.includes(d.id) ? prev.filter((id) => id !== d.id) : [...prev, d.id]))
+                          }
+                        />
+                        🚗 {d.personnes.length ? d.personnes.join(" & ") : `${d.placesRecherchees} place(s)`} ({d.heure})
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </section>
 
@@ -1918,6 +2171,115 @@ function App() {
                 <div style={styles.fieldGroup}>
                   <label style={styles.fieldLabel}>&nbsp;</label>
                   <button type="button" onClick={addTrain} style={styles.addBtn}>Ajouter</button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section style={styles.overview}>
+            <h2 style={styles.overviewTitle}>Recherche de covoiturage</h2>
+            {(covoitDemandes || []).filter((d) => d.day === transportFilter).map((d) => {
+              const car = cars.find((c) => c.id === d.carId);
+
+              if (demandeEditingId === d.id) {
+                return (
+                  <div key={d.id} style={styles.carRow}>
+                    <div style={styles.editRow}>
+                      <select value={demandeEditDraft.day} onChange={(e) => setDemandeEditDraft({ ...demandeEditDraft, day: e.target.value, carId: "" })} style={styles.editTimeInput}>
+                        {TRANSPORT_DAYS.map((day) => <option key={day.key} value={day.key}>{day.label}</option>)}
+                      </select>
+                      <input type="time" value={demandeEditDraft.heure} onChange={(e) => setDemandeEditDraft({ ...demandeEditDraft, heure: e.target.value })} style={styles.editTimeInput} />
+                      <input type="number" min="1" value={demandeEditDraft.placesRecherchees} onChange={(e) => setDemandeEditDraft({ ...demandeEditDraft, placesRecherchees: e.target.value })} style={styles.editTimeInput} placeholder="Places" />
+                    </div>
+                    <input type="text" value={demandeEditDraft.personnes} onChange={(e) => setDemandeEditDraft({ ...demandeEditDraft, personnes: e.target.value })} style={styles.editDetailInputSingle} placeholder="Personnes, séparées par une virgule (optionnel)" />
+                    <input type="tel" value={demandeEditDraft.telephone} onChange={(e) => setDemandeEditDraft({ ...demandeEditDraft, telephone: e.target.value })} style={styles.editDetailInputSingle} placeholder="Téléphone (optionnel)" />
+                    <div style={styles.editRow}>
+                      <input type="text" value={demandeEditDraft.depart} onChange={(e) => setDemandeEditDraft({ ...demandeEditDraft, depart: e.target.value })} style={styles.editTitleInput} placeholder="Départ" />
+                      <input type="text" value={demandeEditDraft.arrivee} onChange={(e) => setDemandeEditDraft({ ...demandeEditDraft, arrivee: e.target.value })} style={styles.editTitleInput} placeholder="Arrivée" />
+                    </div>
+                    <select value={demandeEditDraft.carId} onChange={(e) => setDemandeEditDraft({ ...demandeEditDraft, carId: e.target.value })} style={styles.editDetailInputSingle}>
+                      <option value="">❓ En attente de voiture</option>
+                      {cars.filter((c) => c.day === demandeEditDraft.day).map((c) => <option key={c.id} value={c.id}>{c.conducteur}</option>)}
+                    </select>
+                    <input type="text" value={demandeEditDraft.commentaire} onChange={(e) => setDemandeEditDraft({ ...demandeEditDraft, commentaire: e.target.value })} style={styles.editDetailInputSingle} placeholder="Commentaire (optionnel)" />
+                    <div style={styles.cardActions}>
+                      <button onClick={() => saveDemandeEdit(d.id)} style={styles.saveBtn}>Enregistrer</button>
+                      <button onClick={cancelDemandeEdit} style={styles.cancelBtn}>Annuler</button>
+                    </div>
+                  </div>
+                );
+              }
+
+              return (
+                <div key={d.id} style={styles.carRow}>
+                  <div style={styles.carTop}>
+                    <span style={{ ...styles.transportDriver, fontSize: 16, flex: "0 0 auto" }}>
+                      {d.personnes.length ? d.personnes.join(" & ") : `${d.placesRecherchees} place(s)`}
+                    </span>
+                    {d.exemple && <span style={styles.exampleTag}>Exemple</span>}
+                    {d.telephone && <a href={`tel:${d.telephone.replace(/\s/g, "")}`} style={styles.phoneLink}>📞 {d.telephone}</a>}
+                    <span style={{ ...styles.transportDetail, fontSize: 13.5 }}>{d.heure} · {d.depart} → {d.arrivee}</span>
+                    {d.carId === "none" ? (
+                      <span style={styles.noCarNeededTag}>🚫 Pas besoin de voiture</span>
+                    ) : car ? (
+                      <span style={{ ...styles.transportRoute, fontSize: 13.5, marginLeft: "auto" }}>Avec {car.conducteur}</span>
+                    ) : (
+                      <span style={styles.noRideTag}>❓ En attente de voiture</span>
+                    )}
+                    <button onClick={() => startDemandeEdit(d)} style={{ ...styles.carIconBtn, ...styles.carEditIconBtn }} aria-label="Modifier">✎</button>
+                    <button onClick={() => removeDemande(d.id)} style={{ ...styles.carIconBtn, ...styles.carDeleteIconBtn }} aria-label="Supprimer">✕</button>
+                  </div>
+                  {d.commentaire && <div style={styles.commentLine}>💬 {d.commentaire}</div>}
+                </div>
+              );
+            })}
+            {(covoitDemandes || []).filter((d) => d.day === transportFilter).length === 0 && (
+              <p style={styles.overviewEmpty}>Aucune demande pour ce filtre</p>
+            )}
+
+            <div style={styles.addForm}>
+              <h3 style={styles.addFormTitle}>Rechercher une voiture — {TRANSPORT_DAYS.find((day) => day.key === transportFilter)?.label}</h3>
+              <div style={styles.addFormTopRow}>
+                <div style={styles.fieldGroup}>
+                  <label style={styles.fieldLabel}>Heure</label>
+                  <input type="time" value={newDemandeTime} onChange={(e) => setNewDemandeTime(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addDemande()} style={styles.timeInput} />
+                </div>
+                <div style={styles.fieldGroup}>
+                  <label style={styles.fieldLabel}>Personnes</label>
+                  <input type="text" value={newDemandePersons} onChange={(e) => setNewDemandePersons(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addDemande()} placeholder="Optionnel, séparées par une virgule…" style={styles.textInput} />
+                </div>
+                <div style={styles.fieldGroup}>
+                  <label style={styles.fieldLabel}>Places recherchées</label>
+                  <input type="number" min="1" value={newDemandePlaces} onChange={(e) => setNewDemandePlaces(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addDemande()} placeholder="1" style={styles.timeInput} />
+                </div>
+                <div style={styles.fieldGroup}>
+                  <label style={styles.fieldLabel}>Téléphone</label>
+                  <input type="tel" value={newDemandePhone} onChange={(e) => setNewDemandePhone(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addDemande()} placeholder="Optionnel" style={styles.textInput} />
+                </div>
+                <div style={styles.fieldGroup}>
+                  <label style={styles.fieldLabel}>Départ</label>
+                  <input type="text" value={newDemandeDepart} onChange={(e) => setNewDemandeDepart(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addDemande()} placeholder="D'où tu pars…" style={styles.textInput} />
+                </div>
+                <div style={styles.fieldGroup}>
+                  <label style={styles.fieldLabel}>Arrivée</label>
+                  <input type="text" value={newDemandeArrivee} onChange={(e) => setNewDemandeArrivee(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addDemande()} placeholder="Où tu veux aller…" style={styles.textInput} />
+                </div>
+                <div style={styles.fieldGroup}>
+                  <label style={styles.fieldLabel}>Voiture (si connue)</label>
+                  <select value={newDemandeCarId} onChange={(e) => setNewDemandeCarId(e.target.value)} style={styles.textInput}>
+                    <option value="">❓ En attente de voiture</option>
+                    {cars.filter((c) => c.day === transportFilter).map((c) => (
+                      <option key={c.id} value={c.id}>{c.conducteur} ({seatsLeft(c, trains, covoitDemandes)} place{seatsLeft(c, trains, covoitDemandes) !== 1 ? "s" : ""} libre{seatsLeft(c, trains, covoitDemandes) !== 1 ? "s" : ""})</option>
+                    ))}
+                  </select>
+                </div>
+                <div style={{ ...styles.fieldGroup, flexBasis: "100%" }}>
+                  <label style={styles.fieldLabel}>Commentaire</label>
+                  <input type="text" value={newDemandeComment} onChange={(e) => setNewDemandeComment(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addDemande()} placeholder="Optionnel…" style={{ ...styles.textInput, width: "100%" }} />
+                </div>
+                <div style={styles.fieldGroup}>
+                  <label style={styles.fieldLabel}>&nbsp;</label>
+                  <button type="button" onClick={addDemande} style={styles.addBtn}>Ajouter ma demande</button>
                 </div>
               </div>
             </div>
@@ -2541,6 +2903,15 @@ const styles = {
   noCarNeededTag: { fontFamily: "system-ui, sans-serif", fontSize: 11.5, fontWeight: 700, color: "#8A7156", background: "#8A715614", border: "1px solid #8A715640", borderRadius: 999, padding: "4px 11px", marginLeft: "auto" },
   phoneLink: { fontFamily: "'JetBrains Mono', monospace", fontSize: 12, fontWeight: 600, color: "#4A6670", textDecoration: "none" },
   commentLine: { fontFamily: "sans-serif", fontSize: 12.5, color: "#9C7B52", fontStyle: "italic", marginTop: 8, paddingTop: 8, borderTop: "1px dashed #F0E4CE" },
+  pendingDemandesBox: { marginTop: 10, paddingTop: 10, borderTop: "1px dashed #F0E4CE" },
+  pendingDemandesLabel: { fontFamily: "sans-serif", fontSize: 11, color: "#9C7B52", display: "block", marginBottom: 6 },
+  pendingDemandesList: { display: "flex", flexWrap: "wrap", gap: 6 },
+  pendingDemandeChip: { fontFamily: "'JetBrains Mono', monospace", fontSize: 11, fontWeight: 600, color: "#6B8F71", background: "#6B8F7114", border: "1px solid #6B8F7140", borderRadius: 999, padding: "5px 11px", cursor: "pointer" },
+  pendingCheckboxChip: { fontFamily: "'JetBrains Mono', monospace", fontSize: 11, fontWeight: 600, color: "#7A3A16", background: "#fff", border: "1px solid #E3D5BE", borderRadius: 999, padding: "5px 11px 5px 8px", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 5 },
+  passengerChipRow: { display: "inline-flex", flexWrap: "wrap", gap: 6 },
+  passengerChip: { display: "inline-flex", alignItems: "center", gap: 4, fontFamily: "sans-serif", fontSize: 13, color: "#3B2A1F", background: "#F0E4CE", borderRadius: 999, padding: "3px 4px 3px 10px" },
+  passengerMoveSelect: { fontFamily: "system-ui, sans-serif", fontSize: 11, fontWeight: 700, color: "#fff", background: "#9C4A1C", border: "1px solid #9C4A1C", borderRadius: 999, padding: "3px 8px", cursor: "pointer" },
+  passengerMoveDisabled: { fontFamily: "system-ui, sans-serif", fontSize: 11, fontWeight: 700, color: "#C7A87E", background: "#F0E4CE", borderRadius: 999, padding: "3px 8px" },
 };
 
 
